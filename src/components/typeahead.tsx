@@ -17,7 +17,7 @@ export default function Typeahead({
         className = "",
         limit = 15,
         label = "",
-        debounceTime = 1000,
+        debounceTime = 200,
         placeholder = "Type any text",
         labelClass = "",
         typeaheadClass = "",
@@ -26,14 +26,19 @@ export default function Typeahead({
     const [ text, setText ] = useState<string>("");
     const [ items, setItems ] = useState<string[]>([]);
     const [ highlightedIndex, setHighlightedIndex ] = useState(-1);
-    
+    const [ timer, setTimer ] = useState<any>();
+
     const filterItems = (str: string) => {
         if (str?.length) {
-            const val = str.toLowerCase();
-            const filtered = list.filter(x => x.toLowerCase().includes(val)).slice(0, limit);
-            setText(str)
-            setItems(filtered);
-            setHighlightedIndex(0);
+            setText(str);
+            const newTimer = setTimeout(() => {
+                setHighlightedIndex(0);
+                const val = str.toLowerCase();
+                const filtered = list.filter(x => x.toLowerCase().includes(val)).slice(0, limit);
+                setItems(filtered);
+            }, debounceTime);
+            clearTimeout(timer);
+            setTimer(newTimer);
         }
         else {
             setText("");
