@@ -10,7 +10,7 @@ function App() {
 
   return (
     <div className="App">
-      <Typeahead list={MOCKDATA} onChange={onChange} />
+      <Typeahead label="Country" placeholder="Type any country name" list={MOCKDATA} onChange={onChange} />
     </div>
   );
 }
