@@ -32,10 +32,10 @@ export default function Typeahead({
         if (str?.length) {
             setText(str);
             const newTimer = setTimeout(() => {
-                setHighlightedIndex(0);
                 const val = str.toLowerCase();
                 const filtered = list.filter(x => x.toLowerCase().includes(val)).slice(0, limit);
                 setItems(filtered);
+                setHighlightedIndex(0);
             }, debounceTime);
             clearTimeout(timer);
             setTimer(newTimer);
@@ -85,10 +85,9 @@ export default function Typeahead({
                 case "Tab":
                     item = items[highlightedIndex];
                     setText(item);
-                    filterItems(item);
-                    setItems([]);
                     e.preventDefault();
                     onChange && onChange(item);
+                    setItems([]);
                     break;
                 case "ArrowDown":
                     trySetHighlightedIndex(highlightedIndex + 1);
