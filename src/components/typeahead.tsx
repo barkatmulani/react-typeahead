@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ListGroup } from "react-bootstrap";
 
 type Props = {
     list: string[];
+    className?: string;
     limit?: number;
     label?: string;
     debounceTime?: number; // In milliseconds
@@ -14,7 +14,8 @@ type Props = {
 
 export default function Typeahead({
         list,
-        limit = 20,
+        className = "",
+        limit = 15,
         label = "",
         debounceTime = 1000,
         placeholder = "Type any text",
@@ -26,33 +27,33 @@ export default function Typeahead({
     const [ items, setItems ] = useState<string[]>([]);
     const [ highlightedIndex, setHighlightedIndex ] = useState(-1);
     
-    const onInputChange = (str: string) => {
-        if (str.length) {
+    const filterItems = (str: string) => {
+        if (str?.length) {
             const val = str.toLowerCase();
             const filtered = list.filter(x => x.toLowerCase().includes(val)).slice(0, limit);
             setText(str)
             setItems(filtered);
-            onChange && onChange(str);
+            setHighlightedIndex(0);
         }
         else {
             setText("");
             setItems([]);
-            onChange && onChange("");
+            setHighlightedIndex(-1);
         }
     };
 
     const onItemClicked = (item: string) => {
         setText(item);
-        onInputChange(item);
+        setItems([]);
+        onChange && onChange(item);
     };
     
-    const getHighlightedText = (str: string) => {
+    const getHighlightedItem = (str: string) => {
         const lower = str.toLowerCase();
         const index = lower.indexOf(text.toLowerCase());
         const prefix = str.substring(0, index);
         const high = str.substring(index, index + text.length);
         const suffix = str.substring(index + text.length, lower.length);
-        console.log(prefix, high, suffix, index)
 
         return (
             <span data-value={str}>
@@ -64,24 +65,25 @@ export default function Typeahead({
     };
 
     const trySetHighlightedIndex = (index: number) => {
-        if (index >= -1 && index < items.length) {
+        if (index >= 0 && index < items.length) {
             setHighlightedIndex(index);
             setText(items[index]);
         }
     };
 
     const onKeyDown = (e: any) => {
-        console.log(e.key)
         let item = "";
 
         if (items.length) {
             switch (e.key) {
+                case "Enter":
                 case "Tab":
-                    item = items[0];
+                    item = items[highlightedIndex];
                     setText(item);
-                    onInputChange(item);
+                    filterItems(item);
                     setItems([]);
                     e.preventDefault();
+                    onChange && onChange(item);
                     break;
                 case "ArrowDown":
                     trySetHighlightedIndex(highlightedIndex + 1);
@@ -89,53 +91,41 @@ export default function Typeahead({
                 case "ArrowUp":
                     trySetHighlightedIndex(highlightedIndex - 1);
                     break;
-                case "Enter":
-                    item = items[highlightedIndex];
-                    setText(item);
-                    onInputChange(item);
-                    setItems([]);
-                    e.preventDefault();
-                    break;
             }
         }
     };
 
-    const mouseEnter = (index: number) => {
-        trySetHighlightedIndex(index);
-    };
-
-    const mouseLeave = (index: number) => {
-        trySetHighlightedIndex(-1);
-    }
-
     return (
-        <div className="w-fit">
+        <div className={className}>
             <label className={labelClass}>{label}</label>
+            
             <input
                 title="Input"
                 type="search"
                 value={text}
-                className={`border border-gray-500 ml-2 rounded-sm px-1.5 py-1.5 text-sm ${typeaheadClass}`}
+                className={`border border-gray-500 rounded-sm px-1.5 py-1.5 text-sm ${typeaheadClass}`}
                 placeholder={placeholder}
+                onChange={(e: any) => filterItems(e.target.value)}
                 onKeyDown={onKeyDown}
-                onChange={(e) => onInputChange(e.target.value)}
             />
             {!text || !items.length ? <></> :
-            <ListGroup className="border border-gray-400 text-sm text-neutral-600 cursor-pointer">
-                {items.map((item: string, i: number) => {
-                    return (
-                        <ListGroup.Item
-                            key={i}
-                            className={`p-1 ${highlightedIndex === i ? "bg-neutral-100" : ""}`}
-                            onMouseEnter={() => mouseEnter(i)}
-                            onMouseLeave={() => mouseLeave(i)}
-                            onClick={() => onItemClicked(item)}
-                        >
-                            {getHighlightedText(item)}
-                        </ListGroup.Item>
-                    )
-                })}
-            </ListGroup>
+            <div className="relative">
+                <div className="border border-gray-400 text-sm text-neutral-600 cursor-pointer absolute z-10 bg-white">
+                    {items.map((item: string, i: number) => {
+                        return (
+                            <div
+                                key={i}
+                                className={`p-1 ${highlightedIndex === i ? "bg-neutral-100" : ""}`}
+                                onMouseEnter={() => setHighlightedIndex(i)}
+                                onMouseLeave={() => setHighlightedIndex(-1)}
+                                onClick={() => onItemClicked(item)}
+                            >
+                                {getHighlightedItem(item)}
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
             }
         </div>
     );
