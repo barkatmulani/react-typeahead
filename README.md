@@ -27,7 +27,7 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
-# Usage of Typeahead control
+# Usage
 
 <Typeahead {parameters} />
 
@@ -59,3 +59,5 @@ Class name for typeahead input.
 ### onChange (optional)
 Method to call when an item from the provided list is selected with the selected item as it parameter.
 
+# Demo
+https://typeahead.appshowcase.net/
