@@ -29,7 +29,7 @@ Your app is ready to be deployed!
 
 # Usage
 
-<Typeahead {parameters} />
+### `<Typeahead {parameters} />`
 
 ## Parameters
 
